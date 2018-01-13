@@ -27,12 +27,12 @@ def ml(l):
 	tt=[]
 	for idx, i in enumerate(l):
 		j=i.replace('.','')
-		if i.split('.')[0]=='9':
+		if len(i)==3:
 			j=j+'0'*(4-len(i))
-		elif i.split('.')[0]=='10':
+		elif len(i)==6 and i.split('.')[0]=='4':
+			j=j[:3]
+		else:
 			j=j+'0'*(5-len(i))
-		elif i.split('.')[0]=='5':
-			j=j+'0'*(4-len(i))
 		i=int(j)
 		tmp.append((i,l[idx]))
 	for x in sorted(tmp,key=lambda x: x[0]):
