@@ -2,6 +2,7 @@ import requests
 import plistlib
 
 ioses={}
+major_ver=11
 
 def ios_ipsw():
 	r=requests.get('https://s.mzstatic.com/version')
@@ -40,6 +41,22 @@ def ios_ota():
 						ioses[t]=[]
 						ioses[t].append(ver)
 
+def ios_beta():
+	r=requests.get('https://mesu.apple.com/assets/iOS%sDeveloperSeed/com_apple_MobileAsset_SoftwareUpdate/com_apple_MobileAsset_SoftwareUpdate.xml'%(major_ver))
+	p=plistlib.readPlistFromString(r.content)
+	for i in p:
+		if i =='Assets':
+			versions=p[i]
+			for v in versions:
+				ver=v['OSVersion'].replace('9.9.','')
+				for t in v['SupportedDevices']:
+					if t in ioses:
+						if ver not in ioses[t]:
+							ioses[t].append(ver)
+					else:
+						ioses[t]=[]
+						ioses[t].append(ver)
+
 def ml(l):
 	tmp=[]
 	tt=[]
@@ -59,6 +76,7 @@ def ml(l):
 
 ios_ipsw()
 ios_ota()
+ios_beta()
 
 tmp=[]							
 for de in ioses:
