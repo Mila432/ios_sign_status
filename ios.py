@@ -2,7 +2,8 @@ import requests
 import plistlib
 
 ioses={}
-major_vers=[11,12]
+major_vers=[4,5,11,12]
+device_group=['','audio','tv','watch']
 
 def ios_ipsw():
 	r=requests.get('https://s.mzstatic.com/version')
@@ -26,24 +27,8 @@ def ios_ipsw():
 								#print versions[v][z][t][mv]['Restore']['ProductVersion'],t
 
 def ios_ota():
-	r=requests.get('https://mesu.apple.com/assets/com_apple_MobileAsset_SoftwareUpdate/com_apple_MobileAsset_SoftwareUpdate.xml')
-	p=plistlib.readPlistFromString(r.content)
-	for i in p:
-		if i =='Assets':
-			versions=p[i]
-			for v in versions:
-				ver=v['OSVersion'].replace('9.9.','')
-				for t in v['SupportedDevices']:
-					if t in ioses:
-						if ver not in ioses[t]:
-							ioses[t].append(ver)
-					else:
-						ioses[t]=[]
-						ioses[t].append(ver)
-
-def ios_beta():
-	for major_ver in major_vers:
-		r=requests.get('https://mesu.apple.com/assets/iOS%sDeveloperSeed/com_apple_MobileAsset_SoftwareUpdate/com_apple_MobileAsset_SoftwareUpdate.xml'%(major_ver))
+	for device in device_group:
+		r=requests.get('https://mesu.apple.com/assets%s/com_apple_MobileAsset_SoftwareUpdate/com_apple_MobileAsset_SoftwareUpdate.xml'%('' if device == '' else '/'+device))
 		p=plistlib.readPlistFromString(r.content)
 		for i in p:
 			if i =='Assets':
@@ -57,6 +42,27 @@ def ios_beta():
 						else:
 							ioses[t]=[]
 							ioses[t].append(ver)
+
+def ios_beta():
+	oses=['iOS','tvOS','watchOS']
+	for major_ver in major_vers:
+		for _os in oses:
+			r=requests.get('https://mesu.apple.com/assets/%s%sDeveloperSeed/com_apple_MobileAsset_SoftwareUpdate/com_apple_MobileAsset_SoftwareUpdate.xml'%(_os,major_ver))
+			p=plistlib.readPlistFromString(r.content)
+			if not p:
+				continue
+			for i in p:
+				if i =='Assets':
+					versions=p[i]
+					for v in versions:
+						ver=v['OSVersion'].replace('9.9.','')
+						for t in v['SupportedDevices']:
+							if t in ioses:
+								if ver not in ioses[t]:
+									ioses[t].append(ver)
+							else:
+								ioses[t]=[]
+								ioses[t].append(ver)
 
 def ml(l):
 	tmp=[]
